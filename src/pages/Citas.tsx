@@ -7,14 +7,11 @@ const Citas = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const itemsPerPage = 4;
-
   const navigate = useNavigate();
 
   const data = [
     { fecha: '20/04/24', hora: '10:30 Am', paciente: 'Andrea Liliana Aguilar Cruz', drAsignado: 'Dr. Ruiz', estado: 'Pendiente' },
     { fecha: '20/04/24', hora: '10:30 Am', paciente: 'Andrea Liliana Aguilar Cruz', drAsignado: 'Dr. Ruiz', estado: 'Pendiente' },
-    { fecha: '20/04/24', hora: '10:30 Am', paciente: 'Andrea Liliana Aguilar Cruz', drAsignado: 'Dr. Ruiz', estado: 'Realizada' },
-    { fecha: '20/04/24', hora: '10:30 Am', paciente: 'Andrea Liliana Aguilar Cruz', drAsignado: 'Dr. Ruiz', estado: 'Realizada' },
     { fecha: '20/04/24', hora: '10:30 Am', paciente: 'Andrea Liliana Aguilar Cruz', drAsignado: 'Dr. Ruiz', estado: 'Realizada' },
     { fecha: '20/04/24', hora: '10:30 Am', paciente: 'Andrea Liliana Aguilar Cruz', drAsignado: 'Dr. Ruiz', estado: 'Realizada' },
   ];
@@ -34,19 +31,22 @@ const Citas = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
 
+  const handleNavigateToHistorialMedico = () => {
+    navigate('/Secretaria/HistorialMedico'); 
+  };
+
   return (
     <div className="p-0 bg-[#f0f0f5] min-h-screen">
-   
       <div className="bg-white p-6 rounded-lg shadow-lg mb-6 mt-0" style={{ marginTop: '-2rem' }}>
         <h2 className="text-2xl font-bold text-[#9588d0]">Citas</h2>
       </div>
 
-      
       <div className="flex justify-between mb-4">
         <div className="relative">
           <input
@@ -63,7 +63,6 @@ const Citas = () => {
         </button>
       </div>
 
-     
       <div className="bg-white shadow-md rounded-lg overflow-x-auto">
         <table className="min-w-full text-left table-auto">
           <thead>
@@ -82,14 +81,18 @@ const Citas = () => {
                 <td className="border px-4 py-2 text-xl">{cita.hora}</td>
                 <td className="border px-4 py-2 text-xl">{cita.paciente}</td>
                 <td className="border px-4 py-2 text-xl">{cita.drAsignado}</td>
-                <td className="border px-4 py-2 text-xl">{cita.estado}</td>
+                <td className="border px-4 py-2 text-xl">
+                  {cita.estado}
+                  <button className="p-2 rounded-full text-white ml-6" onClick={handleNavigateToHistorialMedico}>
+                    <img src="/img/info.svg" alt="Historial" width={35} />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-   
       <div className="mt-4 flex justify-end space-x-2">
         {[...Array(totalPages)].map((_, index) => (
           <button
@@ -102,7 +105,6 @@ const Citas = () => {
         ))}
       </div>
 
-    
       <AgregarCita isOpen={showModal} onClose={() => setShowModal(false)} />
     </div>
   );
