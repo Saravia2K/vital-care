@@ -54,7 +54,7 @@ const router = createBrowserRouter([
         element: <HistorialMedicoCita />,
       },
       {
-        path: "HistorialMedico",
+        path: "HistorialMedico/:id",
         element: <HistorialMedico />,
       },
     ],

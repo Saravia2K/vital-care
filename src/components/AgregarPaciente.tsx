@@ -1,48 +1,76 @@
-import { FC, useState } from "react";
+import { FC, useEffect } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import usePatients from "../hooks/usePacientes";
+import { Patient } from "../types";
 
 interface AgregarPacienteModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialValues?: Patient; // Valores iniciales opcionales
 }
 
 const AgregarPacienteModal: FC<AgregarPacienteModalProps> = ({
   isOpen,
   onClose,
+  initialValues,
 }) => {
-  const [nombre, setNombre] = useState<string>("");
-  const [segundoNombre, setSegundoNombre] = useState<string>("");
-  const [apellido, setApellido] = useState<string>("");
-  const [segundoApellido, setSegundoApellido] = useState<string>("");
-  const [sexo, setSexo] = useState<string>("");
-  const [fechaNacimiento, setFechaNacimiento] = useState<string>("");
-  const [correo, setCorreo] = useState<string>("");
-  const [celular, setCelular] = useState<string>("");
-  const [tipoSangre, setTipoSangre] = useState<string>("");
-  const [direccion, setDireccion] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { reloadPatients } = usePatients();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<Patient>({
+    defaultValues: initialValues
+      ? {
+          ...initialValues,
+          // Convert birthdate to YYYY-MM-DD format if it's a Date object
+          birthdate: new Date(initialValues.birthdate)
+            .toISOString()
+            .split("T")[0],
+        }
+      : {
+          first_name: "",
+          second_name: "",
+          first_last_name: "",
+          second_last_name: "",
+          sex: "",
+          birthdate: "",
+          email: "",
+          cellphone: "",
+          blood_type: "",
+          address: "",
+        },
+  });
 
-  if (!isOpen) return null;
+  // Actualizar los valores predeterminados si los iniciales cambian
+  useEffect(() => {
+    if (initialValues) {
+      reset({
+        ...initialValues,
+        birthdate: new Date(initialValues.birthdate)
+          .toISOString()
+          .split("T")[0],
+      });
+    }
+  }, [initialValues, reset]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  // Función para manejar el envío del formulario
+  const onSubmit: SubmitHandler<Patient> = async (data) => {
     const newPatient = {
-      first_name: nombre,
-      second_name: segundoNombre,
-      first_last_name: apellido,
-      second_last_name: segundoApellido,
-      sex: sexo,
-      birthdate: new Date(fechaNacimiento),
-      email: correo,
-      cellphone: celular,
-      blood_type: tipoSangre,
-      address: direccion,
+      ...data,
+      birthdate: new Date(data.birthdate), // Convertir fecha a Date
     };
 
+    const url = initialValues
+      ? `http://localhost:3000/patients/${initialValues.id_patient}`
+      : "http://localhost:3000/patients";
+
+    const method = initialValues ? "PATCH" : "POST";
+
     try {
-      const response = await fetch("http://localhost:3000/patients", {
-        method: "POST",
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -50,17 +78,26 @@ const AgregarPacienteModal: FC<AgregarPacienteModalProps> = ({
       });
 
       if (response.ok) {
-        console.log("Paciente agregado exitosamente");
+        console.log(
+          initialValues
+            ? "Paciente actualizado exitosamente"
+            : "Paciente agregado exitosamente"
+        );
+        reloadPatients();
         onClose(); // Cierra el modal al finalizar
       } else {
-        console.error("Error al agregar el paciente");
+        console.error(
+          initialValues
+            ? "Error al actualizar el paciente"
+            : "Error al agregar el paciente"
+        );
       }
     } catch (error) {
       console.error("Error en la conexión:", error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
@@ -86,18 +123,17 @@ const AgregarPacienteModal: FC<AgregarPacienteModalProps> = ({
         </button>
 
         <h2 className="text-center text-2xl font-bold text-[#9588d0] mb-6">
-          Agregar Paciente
+          {initialValues ? "Actualizar Paciente" : "Agregar Paciente"}
         </h2>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-[#9588d0] font-bold">Nombre</label>
               <input
+                {...register("first_name", { required: true })}
                 type="text"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
                 required
               />
             </div>
@@ -106,20 +142,18 @@ const AgregarPacienteModal: FC<AgregarPacienteModalProps> = ({
                 Segundo Nombre
               </label>
               <input
+                {...register("second_name")}
                 type="text"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                value={segundoNombre}
-                onChange={(e) => setSegundoNombre(e.target.value)}
               />
             </div>
 
             <div>
               <label className="block text-[#9588d0] font-bold">Apellido</label>
               <input
+                {...register("first_last_name", { required: true })}
                 type="text"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                value={apellido}
-                onChange={(e) => setApellido(e.target.value)}
                 required
               />
             </div>
@@ -128,19 +162,17 @@ const AgregarPacienteModal: FC<AgregarPacienteModalProps> = ({
                 Segundo Apellido
               </label>
               <input
+                {...register("second_last_name")}
                 type="text"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                value={segundoApellido}
-                onChange={(e) => setSegundoApellido(e.target.value)}
               />
             </div>
 
             <div>
               <label className="block text-[#9588d0] font-bold">Sexo</label>
               <select
+                {...register("sex", { required: true })}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                value={sexo}
-                onChange={(e) => setSexo(e.target.value)}
                 required
               >
                 <option value="">Seleccionar</option>
@@ -153,10 +185,9 @@ const AgregarPacienteModal: FC<AgregarPacienteModalProps> = ({
                 Fecha de Nacimiento
               </label>
               <input
+                {...register("birthdate", { required: true })}
                 type="date"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                value={fechaNacimiento}
-                onChange={(e) => setFechaNacimiento(e.target.value)}
                 required
               />
             </div>
@@ -164,20 +195,18 @@ const AgregarPacienteModal: FC<AgregarPacienteModalProps> = ({
             <div>
               <label className="block text-[#9588d0] font-bold">Correo</label>
               <input
+                {...register("email", { required: true })}
                 type="email"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                value={correo}
-                onChange={(e) => setCorreo(e.target.value)}
                 required
               />
             </div>
             <div>
               <label className="block text-[#9588d0] font-bold">Cel</label>
               <input
+                {...register("cellphone", { required: true })}
                 type="text"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                value={celular}
-                onChange={(e) => setCelular(e.target.value)}
                 required
               />
             </div>
@@ -187,10 +216,9 @@ const AgregarPacienteModal: FC<AgregarPacienteModalProps> = ({
                 Dirección
               </label>
               <input
+                {...register("address", { required: true })}
                 type="text"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                value={direccion}
-                onChange={(e) => setDireccion(e.target.value)}
                 required
               />
             </div>
@@ -200,10 +228,9 @@ const AgregarPacienteModal: FC<AgregarPacienteModalProps> = ({
                 Tipo De Sangre
               </label>
               <input
+                {...register("blood_type", { required: true })}
                 type="text"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                value={tipoSangre}
-                onChange={(e) => setTipoSangre(e.target.value)}
                 required
               />
             </div>
@@ -215,7 +242,11 @@ const AgregarPacienteModal: FC<AgregarPacienteModalProps> = ({
               className="px-4 py-2 bg-[#9588d0] text-white rounded-lg hover:bg-purple-700"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Agregando..." : "Agregar"}
+              {isSubmitting
+                ? "Procesando..."
+                : initialValues
+                ? "Actualizar"
+                : "Agregar"}
             </button>
           </div>
         </form>

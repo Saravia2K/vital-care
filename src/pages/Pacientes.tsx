@@ -1,63 +1,32 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AgregarPaciente from "../components/AgregarPaciente";
-import EditarPaciente from "../components/EditarPaciente";
+import usePatients from "../hooks/usePacientes";
+import { Patient } from "../types";
 
 const Pacientes = () => {
+  const { patients } = usePatients();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [editPatient, setEditPatient] = useState<Patient>();
   const itemsPerPage = 4;
 
   const navigate = useNavigate();
 
-  const data = [
-    {
-      id: 1,
-      nombre: "Liliana",
-      apellido: "Aguilar",
-      fechaNac: "04/04/2002",
-      sexo: "Femenino",
-    },
-    {
-      id: 2,
-      nombre: "Juan",
-      apellido: "Perez",
-      fechaNac: "10/05/1990",
-      sexo: "Masculino",
-    },
-    {
-      id: 3,
-      nombre: "María",
-      apellido: "González",
-      fechaNac: "12/12/1995",
-      sexo: "Femenino",
-    },
-    {
-      id: 4,
-      nombre: "Pedro",
-      apellido: "Ramirez",
-      fechaNac: "01/02/1985",
-      sexo: "Masculino",
-    },
-    {
-      id: 5,
-      nombre: "Ana",
-      apellido: "Sánchez",
-      fechaNac: "08/09/1993",
-      sexo: "Femenino",
-    },
-  ];
-
-  const filteredData = data.filter((paciente) => {
+  const filteredData = patients.filter((paciente) => {
     const searchLower = searchTerm.toLowerCase();
-    return (
-      paciente.nombre.toLowerCase().includes(searchLower) ||
-      paciente.apellido.toLowerCase().includes(searchLower) ||
-      paciente.fechaNac.includes(searchLower) ||
-      paciente.sexo.toLowerCase().includes(searchLower) ||
-      paciente.id.toString().includes(searchLower)
+    const values = [
+      paciente.first_name,
+      paciente.second_name,
+      paciente.first_last_name,
+      paciente.second_last_name,
+      paciente.birthdate,
+      paciente.sex,
+    ];
+    return values.some(
+      (v) =>
+        v.toLowerCase().includes(searchLower) || v.toLowerCase() == searchLower
     );
   });
 
@@ -71,8 +40,8 @@ const Pacientes = () => {
     setCurrentPage(pageNumber);
   };
 
-  const handleViewInfo = () => {
-    navigate("/Secretaria/HistorialMedico");
+  const handleViewInfo = (id: number) => {
+    navigate(`/Secretaria/HistorialMedico/${id}`);
   };
 
   return (
@@ -96,7 +65,7 @@ const Pacientes = () => {
         </div>
         <button
           className="flex items-center space-x-2 mb-20 text-xl"
-          onClick={() => setShowAddModal(true)}
+          onClick={() => setShowModal(true)}
         >
           <img src="/img/plus.svg" alt="Mas" width={30} />
           <span>Agregar Paciente</span>
@@ -118,23 +87,32 @@ const Pacientes = () => {
           <tbody>
             {currentItems.map((paciente, index) => (
               <tr
-                key={paciente.id}
+                key={paciente.id_patient}
                 className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
               >
-                <td className="border px-4 py-2 text-xl">{paciente.id}</td>
-                <td className="border px-4 py-2 text-xl">{paciente.nombre}</td>
                 <td className="border px-4 py-2 text-xl">
-                  {paciente.apellido}
+                  {paciente.id_patient}
                 </td>
                 <td className="border px-4 py-2 text-xl">
-                  {paciente.fechaNac}
+                  {paciente.first_name} {paciente.second_name}
                 </td>
-                <td className="border px-4 py-2 text-xl">{paciente.sexo}</td>
+                <td className="border px-4 py-2 text-xl">
+                  {paciente.first_last_name} {paciente.second_last_name}
+                </td>
+                <td className="border px-4 py-2 text-xl">
+                  {new Date(paciente.birthdate).toLocaleDateString()}
+                </td>
+                <td className="border px-4 py-2 text-xl">{paciente.sex}</td>
                 <td className="border px-4 py-2 flex justify-center space-x-2">
-                  <button onClick={handleViewInfo}>
+                  <button onClick={() => handleViewInfo(paciente.id_patient)}>
                     <img src="/img/info.svg" alt="Ver Información" width={30} />
                   </button>
-                  <button onClick={() => setShowEditModal(true)}>
+                  <button
+                    onClick={() => {
+                      setShowModal(true);
+                      setEditPatient(paciente);
+                    }}
+                  >
                     <img
                       src="/img/editar.svg"
                       alt="Editar Paciente"
@@ -165,12 +143,12 @@ const Pacientes = () => {
       </div>
 
       <AgregarPaciente
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-      />
-      <EditarPaciente
-        isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditPatient(undefined);
+        }}
+        initialValues={editPatient}
       />
     </div>
   );
