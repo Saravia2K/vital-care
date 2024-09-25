@@ -10,7 +10,7 @@ export default function HistorialMedico() {
   return (
     <div className="bg-[#f0f0f5] min-h-screen p-0">
       <div
-        className="bg-white p-6 rounded-lg shadow-lg mb-6 mt-0 mb-14"
+        className="bg-white p-6 rounded-lg shadow-lg mt-0 mb-14"
         style={{ marginTop: "-2rem" }}
       >
         <h2 className="text-2xl font-bold text-[#9588d0]">
