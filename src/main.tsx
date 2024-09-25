@@ -75,6 +75,10 @@ const router = createBrowserRouter([
         path: "CitaGeneral",
         element: <CitaGeneral />,
       },
+      {
+        path: "HistorialMedicoCita",
+        element: <HistorialMedicoCita />,
+      },
     ],
   },
   {
@@ -92,6 +96,10 @@ const router = createBrowserRouter([
       {
         path: "CitaEspecialista",
         element: <CitaEspecialista />,
+      },
+      {
+        path: "HistorialMedicoCita",
+        element: <HistorialMedicoCita />,
       },
     ],
   },
