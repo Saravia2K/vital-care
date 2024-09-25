@@ -193,11 +193,11 @@ export default function HistorialMedicoCita() {
               <div>
                 <strong className="text-[#9588d0]">Referencia</strong>
                 <p className="text-gray-600">
-                  {cita.reference.from_doctor.names}{" "}
-                  {cita.reference.from_doctor.last_names}
+                  {cita.reference.doctor.names}{" "}
+                  {cita.reference.doctor.last_names}
                 </p>
                 <p className="text-gray-600 text-sm">
-                  {cita.reference.from_doctor.specialty.name}
+                  {cita.reference.doctor.specialty.name}
                 </p>
               </div>
             </div>

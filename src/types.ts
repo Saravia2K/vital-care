@@ -34,7 +34,6 @@ export type Appointment = {
 
 export type Reference = {
   id_reference: number;
-  from_doctor: Doctor;
-  to_doctor: Doctor;
+  doctor: Doctor;
   comments: string;
 };

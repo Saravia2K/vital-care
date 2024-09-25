@@ -72,7 +72,7 @@ const router = createBrowserRouter([
         element: <Medicina />,
       },
       {
-        path: "CitaGeneral",
+        path: "CitaGeneral/:id",
         element: <CitaGeneral />,
       },
       {
