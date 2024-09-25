@@ -17,6 +17,8 @@ import HistorialMedico from "./components/HistorialMedico";
 import HistorialMedicoCita from "./components/HistorialMedicoCita";
 import CitaGeneral from "./components/CitaGeneral";
 import CitaEspecialista from "./components/CitaEspecialista";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 
 const router = createBrowserRouter([
   {
@@ -73,7 +75,6 @@ const router = createBrowserRouter([
         path: "CitaGeneral",
         element: <CitaGeneral />,
       },
-
     ],
   },
   {
@@ -96,8 +97,13 @@ const router = createBrowserRouter([
   },
 ]);
 
+const qc = new QueryClient();
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <QueryClientProvider client={qc}>
+      <RouterProvider router={router} />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   </StrictMode>
 );
