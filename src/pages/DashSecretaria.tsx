@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import AgregarPaciente from "../components/AgregarPaciente";
 import AgregarCita from "../components/AgregarCita";
+import useCitasHoy from "../hooks/useCitasHoy";
+import { format } from "date-fns";
 
 export default function DashSecretaria() {
+  const { citas } = useCitasHoy();
   const [showAgregarPacienteModal, setShowAgregarPacienteModal] =
     useState(false);
   const [showAgregarCitaModal, setShowAgregarCitaModal] = useState(false);
@@ -46,23 +49,29 @@ export default function DashSecretaria() {
               Citas para Ahora
             </h3>
             <ul className="space-y-4">
-              {[1, 2, 3, 4].map((item) => (
-                <li
-                  key={item}
-                  className="flex items-center bg-[#f8f9fc] p-4 rounded-lg border border-gray-200"
-                >
-                  <img
-                    src="/img/citas.png"
-                    alt="Icono Cita"
-                    className="h-10 w-10 mr-4"
-                  />
-                  <div>
-                    <p className="font-bold text-[#9588d0]">Hanna Jonhson</p>
-                    <p className="text-sm text-gray-600">23/07/24, 10:30 AM</p>
-                    <p className="text-[#f18b8d] font-bold">Pendiente</p>
-                  </div>
-                </li>
-              ))}
+              {citas
+                .filter((c) => !c.finished)
+                .map((c) => (
+                  <li
+                    key={c.id_appointment}
+                    className="flex items-center bg-[#f8f9fc] p-4 rounded-lg border border-gray-200"
+                  >
+                    <img
+                      src="/img/citas.png"
+                      alt="Icono Cita"
+                      className="h-10 w-10 mr-4"
+                    />
+                    <div>
+                      <p className="font-bold text-[#9588d0]">
+                        {c.patient.first_name} {c.patient.first_last_name}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {format(new Date(c.date), "dd/MM/yyyy, HH:mm")}
+                      </p>
+                      <p className="text-[#f18b8d] font-bold">Pendiente</p>
+                    </div>
+                  </li>
+                ))}
             </ul>
           </div>
         </div>

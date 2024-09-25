@@ -94,11 +94,11 @@ const router = createBrowserRouter([
         element: <Medicina />,
       },
       {
-        path: "CitaEspecialista",
+        path: "CitaEspecialista/:id",
         element: <CitaEspecialista />,
       },
       {
-        path: "HistorialMedicoCita",
+        path: "HistorialMedicoCita/:id",
         element: <HistorialMedicoCita />,
       },
     ],

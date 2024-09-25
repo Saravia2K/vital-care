@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import usePaciente from "../hooks/usePaciente";
+import { format } from "date-fns";
 
 export default function HistorialMedico() {
   const { id } = useParams<{ id: string }>();
@@ -63,7 +64,7 @@ export default function HistorialMedico() {
         </div>
 
         <div className="col-span-1 grid grid-cols-2 gap-4 justify-items-center">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
+          {patient.appointments.map((a, index) => (
             <div
               key={index}
               className="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-4"
@@ -76,17 +77,19 @@ export default function HistorialMedico() {
               />
               <div>
                 <p className="font-bold text-[#9588d0]">
-                  Dr. {index % 2 === 0 ? "Guevara" : "Ruiz"}
+                  Dr./Dra. {a.doctor.names} {a.doctor.last_names}
                 </p>
-                <p className="text-sm text-gray-600">23/07/24, 10:30 AM</p>
+                <p className="text-sm text-gray-600">
+                  {format(new Date(a.date), "dd/MM/yyyy, HH:mm")}
+                </p>
                 <p
                   className={
-                    index % 2 === 0
+                    !a.finished
                       ? "text-[#f18b8d] font-bold"
                       : "text-green-500 font-bold"
                   }
                 >
-                  {index % 2 === 0 ? "Pendiente" : "Realizada"}
+                  {!a.finished ? "Pendiente" : "Realizada"}
                 </p>
               </div>
             </div>

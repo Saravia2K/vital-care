@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 import { API_URL } from "../consts";
+import { Appointment } from "../types";
 
 const fetchPatient = (id: number) =>
   fetch(`${API_URL}/patients/${id}`).then((res) => res.json());
@@ -29,4 +30,5 @@ type Response = {
   email: string;
   cellphone: string;
   blood_type: string;
+  appointments: Appointment[];
 };

@@ -1,20 +1,32 @@
 import jsPDF from "jspdf";
 import useCita from "../hooks/useCita";
 import { useParams } from "react-router-dom";
-import { addDays, format } from "date-fns";
+import { addDays, addHours, format } from "date-fns";
+import { useCallback } from "react";
 
 export default function HistorialMedicoCita() {
   const { id } = useParams<{ id: string }>();
   const { cita } = useCita(+id!);
 
-  if (!cita) return;
+  const generarPDF = useCallback(() => {
+    if (!cita) return;
 
-  const generarPDF = () => {
     const doc = new jsPDF();
+    const { patient } = cita;
+    const patientFullname = [
+      patient.first_name,
+      patient.second_name,
+      patient.first_last_name,
+      patient.second_last_name,
+    ].join(" ");
 
     doc.setFontSize(22);
     doc.setTextColor("#9588d0");
-    doc.text("Historial Medico - Cita 23/07/2024", 15, 20);
+    doc.text(
+      `Historial Medico - Cita ${format(new Date(cita.date), "dd/MM/yyyy")}`,
+      15,
+      20
+    );
 
     doc.setDrawColor(150, 150, 150);
     doc.line(10, 25, 200, 25);
@@ -27,32 +39,32 @@ export default function HistorialMedicoCita() {
     doc.setFont("bold");
     doc.text("Nombre:", 15, 45);
     doc.setFont("normal");
-    doc.text("Andrea Liliana Aguilar Cruz", 45, 45);
+    doc.text(patientFullname, 45, 45);
 
     doc.setFont("bold");
     doc.text("Sexo:", 15, 55);
     doc.setFont("normal");
-    doc.text("Femenino", 45, 55);
+    doc.text(cita.patient.sex == "F" ? "Femenino" : "Masculino", 45, 55);
 
     doc.setFont("bold");
     doc.text("Nacimiento:", 15, 65);
     doc.setFont("normal");
-    doc.text("04/04/2002", 45, 65);
+    doc.text(format(addHours(new Date(cita.date), 6), "dd/MM/yyyy"), 45, 65);
 
     doc.setFont("bold");
     doc.text("Correo:", 15, 75);
     doc.setFont("normal");
-    doc.text("lilianaaguilar@gmail.com", 45, 75);
+    doc.text(cita.patient.email, 45, 75);
 
     doc.setFont("bold");
     doc.text("Cel:", 15, 85);
     doc.setFont("normal");
-    doc.text("70889636", 45, 85);
+    doc.text(cita.patient.cellphone, 45, 85);
 
     doc.setFont("bold");
     doc.text("Tipo de Sangre:", 15, 95);
     doc.setFont("normal");
-    doc.text("ROH Negativo", 45, 95);
+    doc.text(cita.patient.blood_type, 45, 95);
 
     doc.setDrawColor(150, 150, 150);
     doc.line(10, 105, 200, 105);
@@ -63,25 +75,24 @@ export default function HistorialMedicoCita() {
     doc.text("Médico a cargo:", 15, 115);
     doc.setFont("normal");
     doc.setTextColor(241, 139, 141);
-    doc.text("Dr. Ruiz", 60, 115);
+    doc.text(`${cita.doctor.names} ${cita.doctor.last_names}`, 60, 115);
 
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
     doc.setFont("bold");
     doc.text("Diagnóstico:", 15, 130);
     doc.setFont("normal");
-    doc.text("Hipertensión Moderada", 45, 130);
+    doc.text(cita.diagnosis || "", 45, 130);
 
     doc.setFont("bold");
     doc.text("Tratamiento:", 15, 140);
     doc.setFont("normal");
-    doc.text("20 Lorsantán de 50mg", 45, 140);
+    doc.text(cita.treatment || "", 45, 140);
 
     doc.setFont("bold");
     doc.text("Observaciones:", 15, 150);
     doc.setFont("normal");
-    doc.text("Se le Recetó al paciente Lorsantán de 50mg por un mes,", 15, 160);
-    doc.text("tomar una cápsula al día después de almuerzo.", 15, 170);
+    doc.text(cita.observations || "", 15, 160);
 
     doc.setDrawColor(150, 150, 150);
     doc.line(10, 180, 200, 180);
@@ -93,7 +104,11 @@ export default function HistorialMedicoCita() {
 
     doc.setFont("normal");
     doc.setFontSize(12);
-    doc.text("Dr. Guevara - Especialista del Corazón", 45, 190);
+    doc.text(
+      `${cita.doctor.names} ${cita.doctor.last_names} - ${cita.doctor.specialty.name}`,
+      45,
+      190
+    );
 
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
@@ -103,8 +118,11 @@ export default function HistorialMedicoCita() {
       280
     );
 
-    doc.save("HistorialMedico_Cita_23072024.pdf");
-  };
+    doc.save(`HistorialMedico_Cita_${new Date(cita.date).getTime()}.pdf`);
+  }, [cita]);
+
+  if (!cita) return;
+
   const { patient } = cita;
   const patientFullname = [
     patient.first_name,

@@ -1,6 +1,6 @@
 import { FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import useCitasHoy from "../hooks/useCitasHoy";
 import useCitas from "../hooks/useCitas";
 
@@ -95,7 +95,7 @@ const DashGeneral: FC = () => {
                     style={{ cursor: "pointer" }}
                   >
                     <td className="border px-4 py-2 text-xl">
-                      {format(addDays(new Date(cita.date), 1), "dd/MM/yyyy")}
+                      {format(new Date(cita.date), "dd/MM/yyyy")}
                     </td>
                     <td className="border px-4 py-2 text-xl">
                       {new Date(cita.date).toLocaleTimeString()}
