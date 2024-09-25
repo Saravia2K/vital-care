@@ -50,7 +50,7 @@ const router = createBrowserRouter([
         element: <Medicina />,
       },
       {
-        path: "HistorialMedicoCita",
+        path: "HistorialMedicoCita/:id",
         element: <HistorialMedicoCita />,
       },
       {

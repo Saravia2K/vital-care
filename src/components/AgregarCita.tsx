@@ -1,30 +1,73 @@
-import React, { useState } from 'react';
+import { FC } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import usePatients from "../hooks/usePacientes";
+import useDoctores from "../hooks/useDoctores";
+import useCitas from "../hooks/useCitas";
 
 interface AgregarCitaProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const AgregarCita: React.FC<AgregarCitaProps> = ({ isOpen, onClose }) => {
-  const [fecha, setFecha] = useState('');
-  const [hora, setHora] = useState('');
-  const [paciente, setPaciente] = useState('');
-  const [doctor, setDoctor] = useState('');
-  const [estado, setEstado] = useState('Pendiente');
+interface AppointmentFormData {
+  fecha: string;
+  hora: string;
+  paciente: string;
+  doctor: string;
+  estado: string;
+}
 
-  const pacientes = ['Andrea Liliana Aguilar Cruz', 'Juan Pérez', 'María González'];
-  const doctores = ['Dr. Ruiz', 'Dr. Guevara'];
+const AgregarCita: FC<AgregarCitaProps> = ({ isOpen, onClose }) => {
+  const { patients } = usePatients();
+  const { doctores } = useDoctores();
+  const { reloadCitas } = useCitas();
 
-  const handleSave = () => {
-  
-    console.log({
-      fecha,
-      hora,
-      paciente,
-      doctor,
-      estado,
-    });
-    onClose();
+  // Obtener la fecha actual en formato YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0];
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+    reset,
+  } = useForm<AppointmentFormData>({
+    defaultValues: {
+      fecha: "",
+      hora: "",
+      paciente: "",
+      doctor: "",
+      estado: "Pendiente",
+    },
+  });
+
+  // Función para manejar el envío del formulario
+  const onSubmit: SubmitHandler<AppointmentFormData> = async (data) => {
+    const newAppointment = {
+      date: new Date(`${data.fecha}T${data.hora}`),
+      id_patient: +data.paciente,
+      id_doctor: +data.doctor,
+    };
+
+    try {
+      const response = await fetch("http://localhost:3000/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newAppointment),
+      });
+
+      if (response.ok) {
+        console.log("Cita agregada exitosamente");
+        reset(); // Resetear el formulario después de guardar
+        onClose(); // Cerrar el modal
+        reloadCitas();
+      } else {
+        console.error("Error al agregar la cita");
+      }
+    } catch (error) {
+      console.error("Error en la conexión:", error);
+    }
   };
 
   if (!isOpen) return null;
@@ -32,7 +75,6 @@ const AgregarCita: React.FC<AgregarCitaProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white rounded-lg p-6 w-[600px] shadow-lg relative">
-       
         <button
           onClick={onClose}
           className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 focus:outline-none"
@@ -53,83 +95,72 @@ const AgregarCita: React.FC<AgregarCitaProps> = ({ isOpen, onClose }) => {
           </svg>
         </button>
 
-        
         <h2 className="text-center text-2xl font-bold text-[#9588d0] mb-6">
           Agregar Nueva Cita
         </h2>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-[#9588d0] font-bold">Fecha</label>
               <input
                 type="date"
-                value={fecha}
-                onChange={(e) => setFecha(e.target.value)}
+                {...register("fecha", { required: true })}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
+                required
+                min={today} // Establecer el mínimo a la fecha actual
               />
             </div>
             <div>
               <label className="block text-[#9588d0] font-bold">Hora</label>
               <input
                 type="time"
-                value={hora}
-                onChange={(e) => setHora(e.target.value)}
+                {...register("hora", { required: true })}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
+                required
               />
             </div>
 
             <div>
               <label className="block text-[#9588d0] font-bold">Paciente</label>
               <select
-                value={paciente}
-                onChange={(e) => setPaciente(e.target.value)}
+                {...register("paciente", { required: true })}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
+                required
               >
                 <option value="">Seleccionar Paciente</option>
-                {pacientes.map((p, index) => (
-                  <option key={index} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[#9588d0] font-bold">Doctor</label>
-              <select
-                value={doctor}
-                onChange={(e) => setDoctor(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-              >
-                <option value="">Seleccionar Doctor</option>
-                {doctores.map((d, index) => (
-                  <option key={index} value={d}>
-                    {d}
+                {patients.map((p, index) => (
+                  <option key={index} value={p.id_patient}>
+                    {p.first_name} {p.first_last_name}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className="col-span-2">
-              <label className="block text-[#9588d0] font-bold">Estado</label>
+            <div>
+              <label className="block text-[#9588d0] font-bold">Doctor</label>
               <select
-                value={estado}
-                onChange={(e) => setEstado(e.target.value)}
+                {...register("doctor", { required: true })}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
+                required
               >
-                <option value="Pendiente">Pendiente</option>
-                <option value="Realizada">Realizada</option>
+                <option value="">Seleccionar Doctor</option>
+                {doctores.map((d, index) => (
+                  <option key={index} value={d.id_doctor}>
+                    {d.names} {d.last_names} - {d.specialty.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
           <div className="flex justify-center">
             <button
-              type="button"
-              onClick={handleSave}
+              type="submit"
+              disabled={isSubmitting}
               className="px-4 py-2 bg-[#9588d0] text-white rounded-lg hover:bg-purple-700"
             >
-              Guardar
+              {isSubmitting ? "Guardando..." : "Guardar"}
             </button>
           </div>
         </form>

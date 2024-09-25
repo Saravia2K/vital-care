@@ -1,29 +1,33 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AgregarCita from '../components/AgregarCita';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import AgregarCita from "../components/AgregarCita";
+import useCitas from "../hooks/useCitas";
 
 const Citas = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const { citas } = useCitas();
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const itemsPerPage = 4;
   const navigate = useNavigate();
 
-  const data = [
-    { fecha: '20/04/24', hora: '10:30 Am', paciente: 'Andrea Liliana Aguilar Cruz', drAsignado: 'Dr. Ruiz', estado: 'Pendiente' },
-    { fecha: '20/04/24', hora: '10:30 Am', paciente: 'Andrea Liliana Aguilar Cruz', drAsignado: 'Dr. Ruiz', estado: 'Pendiente' },
-    { fecha: '20/04/24', hora: '10:30 Am', paciente: 'Andrea Liliana Aguilar Cruz', drAsignado: 'Dr. Ruiz', estado: 'Realizada' },
-    { fecha: '20/04/24', hora: '10:30 Am', paciente: 'Andrea Liliana Aguilar Cruz', drAsignado: 'Dr. Ruiz', estado: 'Realizada' },
-  ];
-
-  const filteredData = data.filter((cita) => {
+  const filteredData = citas.filter((cita) => {
     const searchLower = searchTerm.toLowerCase();
-    return (
-      cita.paciente.toLowerCase().includes(searchLower) ||
-      cita.drAsignado.toLowerCase().includes(searchLower) ||
-      cita.fecha.includes(searchLower) ||
-      cita.estado.toLowerCase().includes(searchLower)
-    );
+    const { patient, doctor } = cita;
+    const patientFullname = [
+      patient.first_name,
+      patient.second_name,
+      patient.first_last_name,
+      patient.second_last_name,
+    ].join(" ");
+    const doctorFullname = [doctor.names, doctor.last_names].join(" ");
+    const vals = [
+      cita.date,
+      patientFullname,
+      doctorFullname,
+      cita.finished ? "Realizada" : "Pendiente",
+    ];
+    return vals.some((v) => v.toLowerCase().includes(searchLower));
   });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -36,14 +40,16 @@ const Citas = () => {
     setCurrentPage(pageNumber);
   };
 
-
-  const handleNavigateToHistorialMedico = () => {
-    navigate('/Secretaria/HistorialMedico'); 
+  const handleNavigateToHistorialMedico = (id: number) => {
+    navigate(`/Secretaria/HistorialMedicoCita/${id}`);
   };
 
   return (
     <div className="p-0 bg-[#f0f0f5] min-h-screen">
-      <div className="bg-white p-6 rounded-lg shadow-lg mb-6 mt-0" style={{ marginTop: '-2rem' }}>
+      <div
+        className="bg-white p-6 rounded-lg shadow-lg mb-6 mt-0"
+        style={{ marginTop: "-2rem" }}
+      >
         <h2 className="text-2xl font-bold text-[#9588d0]">Citas</h2>
       </div>
 
@@ -57,7 +63,10 @@ const Citas = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button className="flex items-center space-x-2 mb-20 text-xl" onClick={() => setShowModal(true)}>
+        <button
+          className="flex items-center space-x-2 mb-20 text-xl"
+          onClick={() => setShowModal(true)}
+        >
           <img src="/img/plus.svg" alt="Mas" width={30} />
           <span>Agregar Cita</span>
         </button>
@@ -76,14 +85,30 @@ const Citas = () => {
           </thead>
           <tbody>
             {currentItems.map((cita, index) => (
-              <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                <td className="border px-4 py-2 text-xl">{cita.fecha}</td>
-                <td className="border px-4 py-2 text-xl">{cita.hora}</td>
-                <td className="border px-4 py-2 text-xl">{cita.paciente}</td>
-                <td className="border px-4 py-2 text-xl">{cita.drAsignado}</td>
+              <tr
+                key={index}
+                className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+              >
                 <td className="border px-4 py-2 text-xl">
-                  {cita.estado}
-                  <button className="p-2 rounded-full text-white ml-6" onClick={handleNavigateToHistorialMedico}>
+                  {new Date(cita.date).toLocaleDateString()}
+                </td>
+                <td className="border px-4 py-2 text-xl">
+                  {new Date(cita.date).toLocaleTimeString()}
+                </td>
+                <td className="border px-4 py-2 text-xl">
+                  {cita.patient.first_name} {cita.patient.first_last_name}
+                </td>
+                <td className="border px-4 py-2 text-xl">
+                  {cita.doctor.names} {cita.doctor.last_names}
+                </td>
+                <td className="border px-4 py-2 text-xl">
+                  {cita.finished ? "Realizada" : "Pendiente"}
+                  <button
+                    className="p-2 rounded-full text-white ml-6"
+                    onClick={() =>
+                      handleNavigateToHistorialMedico(cita.id_appointment)
+                    }
+                  >
                     <img src="/img/info.svg" alt="Historial" width={35} />
                   </button>
                 </td>
@@ -97,7 +122,11 @@ const Citas = () => {
         {[...Array(totalPages)].map((_, index) => (
           <button
             key={index}
-            className={`px-3 py-1 rounded-lg ${currentPage === index + 1 ? 'bg-[#9588d0] text-white' : 'bg-gray-200'}`}
+            className={`px-3 py-1 rounded-lg ${
+              currentPage === index + 1
+                ? "bg-[#9588d0] text-white"
+                : "bg-gray-200"
+            }`}
             onClick={() => handlePageChange(index + 1)}
           >
             {index + 1}
