@@ -12,18 +12,16 @@ const DashEspecialista: React.FC = () => {
 
   const filteredData = citas.filter((cita) => {
     const searchLower = searchTerm.toLowerCase();
-    const { patient, doctor } = cita;
+    const { patient } = cita;
     const patientFullname = [
       patient.first_name,
       patient.second_name,
       patient.first_last_name,
       patient.second_last_name,
     ].join(" ");
-    const doctorFullname = [doctor.names, doctor.last_names].join(" ");
     const vals = [
       cita.date,
       patientFullname,
-      doctorFullname,
       cita.finished ? "Realizada" : "Pendiente",
     ];
     return vals.some((v) => v.toLowerCase().includes(searchLower));
@@ -83,7 +81,6 @@ const DashEspecialista: React.FC = () => {
                   <th className="px-4 py-2">Fecha</th>
                   <th className="px-4 py-2">Hora</th>
                   <th className="px-4 py-2">Paciente</th>
-                  <th className="px-4 py-2">Dr. Asignado</th>
                   <th className="px-4 py-2">Estado</th>
                 </tr>
               </thead>
@@ -102,9 +99,6 @@ const DashEspecialista: React.FC = () => {
                     </td>
                     <td className="border px-4 py-2 text-xl">
                       {cita.patient.first_name} {cita.patient.first_last_name}
-                    </td>
-                    <td className="border px-4 py-2 text-xl">
-                      {cita.doctor.names} {cita.doctor.last_names}
                     </td>
                     <td className="border px-4 py-2 text-xl">
                       {cita.finished ? "Realizado" : "Pendiente"}

@@ -14,18 +14,16 @@ const DashGeneral: FC = () => {
 
   const filteredData = citas.filter((cita) => {
     const searchLower = searchTerm.toLowerCase();
-    const { patient, doctor } = cita;
+    const { patient } = cita;
     const patientFullname = [
       patient.first_name,
       patient.second_name,
       patient.first_last_name,
       patient.second_last_name,
     ].join(" ");
-    const doctorFullname = [doctor.names, doctor.last_names].join(" ");
     const vals = [
       cita.date,
       patientFullname,
-      doctorFullname,
       cita.finished ? "Realizada" : "Pendiente",
     ];
     return vals.some((v) => v.toLowerCase().includes(searchLower));
@@ -43,7 +41,7 @@ const DashGeneral: FC = () => {
 
   const handleCitaClick = (finished: boolean, id: number) => {
     if (finished) {
-      navigate("/General/HistorialMedicoCita");
+      navigate(`/General/HistorialMedicoCita/${id}`);
       return;
     }
 
@@ -83,7 +81,6 @@ const DashGeneral: FC = () => {
                   <th className="px-4 py-2">Fecha</th>
                   <th className="px-4 py-2">Hora</th>
                   <th className="px-4 py-2">Paciente</th>
-                  <th className="px-4 py-2">Dr. Asignado</th>
                   <th className="px-4 py-2">Estado</th>
                 </tr>
               </thead>
@@ -102,9 +99,6 @@ const DashGeneral: FC = () => {
                     </td>
                     <td className="border px-4 py-2 text-xl">
                       {cita.patient.first_name} {cita.patient.first_last_name}
-                    </td>
-                    <td className="border px-4 py-2 text-xl">
-                      {cita.doctor.names} {cita.doctor.last_names}
                     </td>
                     <td className="border px-4 py-2 text-xl">
                       {cita.finished ? "Realizada" : "Pendiente"}
@@ -145,33 +139,35 @@ const DashGeneral: FC = () => {
             Citas para Ahora
           </h3>
           <div className="grid grid-cols-1 gap-4">
-            {citasHoy.map((cita, index) => (
-              <div
-                key={index}
-                className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-md"
-              >
-                <img
-                  src="/img/citas.png"
-                  alt="Icono Cardiograma"
-                  className="h-12 w-12"
-                />
-                <div>
-                  <p className="font-bold text-[#9588d0]">
-                    {cita.patient.first_name} {cita.patient.first_last_name}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {format(new Date(cita.date), "dd/MM/yyyy, HH:mm")}
-                  </p>
-                  <p className="font-bold text-[#f18b8d]">Pendiente</p>
-                </div>
-                <button
-                  className="p-2 rounded-full text-white"
-                  onClick={() => handleCitaClick(false, cita.id_appointment)}
+            {citasHoy
+              .filter((c) => !c.finished)
+              .map((cita, index) => (
+                <div
+                  key={index}
+                  className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-md"
                 >
-                  <img src="/img/info.svg" alt="Editar" width={35} />
-                </button>
-              </div>
-            ))}
+                  <img
+                    src="/img/citas.png"
+                    alt="Icono Cardiograma"
+                    className="h-12 w-12"
+                  />
+                  <div>
+                    <p className="font-bold text-[#9588d0]">
+                      {cita.patient.first_name} {cita.patient.first_last_name}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {format(new Date(cita.date), "dd/MM/yyyy, HH:mm")}
+                    </p>
+                    <p className="font-bold text-[#f18b8d]">Pendiente</p>
+                  </div>
+                  <button
+                    className="p-2 rounded-full text-white"
+                    onClick={() => handleCitaClick(false, cita.id_appointment)}
+                  >
+                    <img src="/img/info.svg" alt="Editar" width={35} />
+                  </button>
+                </div>
+              ))}
           </div>
         </div>
       </div>

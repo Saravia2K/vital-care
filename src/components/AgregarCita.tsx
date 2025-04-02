@@ -1,8 +1,8 @@
 import { FC } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import usePatients from "../hooks/usePacientes";
-import useDoctores from "../hooks/useDoctores";
 import useCitas from "../hooks/useCitas";
+import useCitasHoy from "../hooks/useCitasHoy";
 
 interface AgregarCitaProps {
   isOpen: boolean;
@@ -19,8 +19,8 @@ interface AppointmentFormData {
 
 const AgregarCita: FC<AgregarCitaProps> = ({ isOpen, onClose }) => {
   const { patients } = usePatients();
-  const { doctores } = useDoctores();
   const { reloadCitas } = useCitas();
+  const { reloadCitas: reloadCitasHoy } = useCitasHoy();
 
   // Obtener la fecha actual en formato YYYY-MM-DD
   const today = new Date().toISOString().split("T")[0];
@@ -35,7 +35,6 @@ const AgregarCita: FC<AgregarCitaProps> = ({ isOpen, onClose }) => {
       fecha: "",
       hora: "",
       paciente: "",
-      doctor: "",
       estado: "Pendiente",
     },
   });
@@ -45,7 +44,6 @@ const AgregarCita: FC<AgregarCitaProps> = ({ isOpen, onClose }) => {
     const newAppointment = {
       date: new Date(`${data.fecha}T${data.hora}`),
       id_patient: +data.paciente,
-      id_doctor: +data.doctor,
     };
 
     try {
@@ -62,6 +60,7 @@ const AgregarCita: FC<AgregarCitaProps> = ({ isOpen, onClose }) => {
         reset(); // Resetear el formulario después de guardar
         onClose(); // Cerrar el modal
         reloadCitas();
+        reloadCitasHoy();
       } else {
         console.error("Error al agregar la cita");
       }
@@ -132,22 +131,6 @@ const AgregarCita: FC<AgregarCitaProps> = ({ isOpen, onClose }) => {
                 {patients.map((p, index) => (
                   <option key={index} value={p.id_patient}>
                     {p.first_name} {p.first_last_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[#9588d0] font-bold">Doctor</label>
-              <select
-                {...register("doctor", { required: true })}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9588d0]"
-                required
-              >
-                <option value="">Seleccionar Doctor</option>
-                {doctores.map((d, index) => (
-                  <option key={index} value={d.id_doctor}>
-                    {d.names} {d.last_names} - {d.specialty.name}
                   </option>
                 ))}
               </select>

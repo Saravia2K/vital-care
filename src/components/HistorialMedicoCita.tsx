@@ -75,7 +75,11 @@ export default function HistorialMedicoCita() {
     doc.text("Médico a cargo:", 15, 115);
     doc.setFont("normal");
     doc.setTextColor(241, 139, 141);
-    doc.text(`${cita.doctor.names} ${cita.doctor.last_names}`, 60, 115);
+    doc.text(
+      `${cita.reference?.doctor.names} ${cita.reference?.doctor.last_names}`,
+      60,
+      115
+    );
 
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
@@ -105,7 +109,7 @@ export default function HistorialMedicoCita() {
     doc.setFont("normal");
     doc.setFontSize(12);
     doc.text(
-      `${cita.doctor.names} ${cita.doctor.last_names} - ${cita.doctor.specialty.name}`,
+      `${cita.reference?.doctor.names} ${cita.reference?.doctor.last_names} - ${cita.reference?.doctor.specialty.name}`,
       45,
       190
     );
@@ -122,6 +126,8 @@ export default function HistorialMedicoCita() {
   }, [cita]);
 
   if (!cita) return;
+
+  console.log({ cita });
 
   const { patient } = cita;
   const patientFullname = [
@@ -183,13 +189,6 @@ export default function HistorialMedicoCita() {
         </div>
 
         <div className="col-span-1 grid grid-cols-1 gap-4">
-          <div className="bg-[#f18b8d] p-4 rounded-3xl shadow-lg text-lg text-white">
-            <strong>Médico a cargo:</strong>{" "}
-            <span>
-              {cita.doctor.names} {cita.doctor.last_names}
-            </span>
-          </div>
-
           <div className="bg-white p-4 rounded-3xl shadow-md text-lg">
             <strong className="text-[#9588d0]">Diagnóstico</strong>
             <p className="text-gray-600 mt-2">{cita.diagnosis}</p>
@@ -223,14 +222,16 @@ export default function HistorialMedicoCita() {
         </div>
       </div>
 
-      <div className="fixed bottom-4 right-4">
-        <img
-          src="/img/pdf.svg"
-          alt="Descargar PDF"
-          className="w-12 h-12 cursor-pointer"
-          onClick={generarPDF}
-        />
-      </div>
+      {cita.reference && (
+        <div className="fixed bottom-4 right-4">
+          <img
+            src="/img/pdf.svg"
+            alt="Descargar PDF"
+            className="w-12 h-12 cursor-pointer"
+            onClick={generarPDF}
+          />
+        </div>
+      )}
     </div>
   );
 }

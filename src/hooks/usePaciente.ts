@@ -9,7 +9,6 @@ export default function usePaciente(id: number) {
   const { data, refetch } = useQuery<Response>({
     queryFn: () => fetchPatient(id),
     queryKey: ["patients", id],
-    staleTime: Infinity,
   });
 
   return {

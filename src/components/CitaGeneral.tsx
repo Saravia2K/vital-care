@@ -185,7 +185,7 @@ export default function CitaGeneral() {
                     <option value="">Seleccionar Especialista</option>
                     {doctores.map((d) => (
                       <option key={d.id_doctor} value={d.id_doctor}>
-                        {d.names} {d.last_names}
+                        {d.names} {d.last_names} - {d.specialty.name}
                       </option>
                     ))}
                   </select>

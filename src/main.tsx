@@ -76,7 +76,7 @@ const router = createBrowserRouter([
         element: <CitaGeneral />,
       },
       {
-        path: "HistorialMedicoCita",
+        path: "HistorialMedicoCita/:id",
         element: <HistorialMedicoCita />,
       },
     ],

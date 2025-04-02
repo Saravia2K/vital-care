@@ -8,7 +8,7 @@ const fetchCita = (id: number) =>
 export default function useCita(id: number) {
   const { data, refetch } = useQuery<Appointment>({
     queryFn: () => fetchCita(id),
-    queryKey: ["patients", id],
+    queryKey: ["cita", id],
   });
 
   return {

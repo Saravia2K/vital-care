@@ -64,7 +64,7 @@ export default function HistorialMedico() {
         </div>
 
         <div className="col-span-1 grid grid-cols-2 gap-4 justify-items-center">
-          {patient.appointments.map((a, index) => (
+          {(patient.appointments || []).map((a, index) => (
             <div
               key={index}
               className="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-4"
@@ -76,9 +76,14 @@ export default function HistorialMedico() {
                 className="h-12 w-12"
               />
               <div>
-                <p className="font-bold text-[#9588d0]">
-                  Dr./Dra. {a.doctor.names} {a.doctor.last_names}
-                </p>
+                {a.reference ? (
+                  <p className="font-bold text-[#9588d0]">
+                    Dr./Dra. {a.reference?.doctor.names}{" "}
+                    {a.reference?.doctor.last_names}
+                  </p>
+                ) : (
+                  <p className="font-bold text-[#9588d0]">Médico general</p>
+                )}
                 <p className="text-sm text-gray-600">
                   {format(new Date(a.date), "dd/MM/yyyy, HH:mm")}
                 </p>
